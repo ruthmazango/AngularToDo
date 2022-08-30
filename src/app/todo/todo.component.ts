@@ -15,6 +15,15 @@ export class TodoComponent implements OnInit {
   task : ITask [] = [];
   inprogress : ITask [] = [];
   done : ITask [] = []; 
+  updateIndex !: any;
+  isEditEnabled :boolean = false;
+  constructor(private fb: FormBuilder) { }
+
+  ngOnInit(): void {
+    this.todoForm = this.fb.group({
+      item : ['', Validators.required],
+    })
+  }
   
   drop(event: CdkDragDrop<ITask[]>) {
     if (event.previousContainer === event.container) {
@@ -33,15 +42,33 @@ export class TodoComponent implements OnInit {
     this.task.push({
       description: this.todoForm.value.item,
       done: false
-    })
+    });
+    this.todoForm.reset();
   }
 
-  constructor(private fb: FormBuilder) { }
-
-  ngOnInit(): void {
-    this.todoForm = this.fb.group({
-      item : ['', Validators.required],
-    })
+  deleteTask(i: number){
+    this.task.splice(i, 1)
   }
 
+  deleteInProgressTask(i: number){
+    this.inprogress.splice(i, 1)
+  }
+
+  deleteDoneTask(i: number){
+    this.done.splice(i, 1)
+  }
+
+  onEdit (item:ITask, i: number){
+    this.todoForm.controls['item'].setValue(item.description);
+    this.updateIndex = i;
+    this.isEditEnabled = true;
+  }
+
+  updateTask(){
+    this.task[this.updateIndex].description = this.todoForm.value.item;
+    this.task[this.updateIndex].done = false;
+    this.todoForm.reset();
+    this.updateIndex = undefined;
+    this.isEditEnabled = false;
+  }
 }
